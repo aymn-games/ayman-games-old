@@ -762,9 +762,71 @@
             background: rgba(254, 44, 85, 0.7);
             border-color: #fe2c55;
         }
+        /* ===== شاشة الانتقال للموقع الجديد (تغطي الصفحة بالكامل) ===== */
+        html.moved-lock, html.moved-lock body { overflow: hidden !important; }
+        .moved-overlay {
+            position: fixed; inset: 0; z-index: 2147483647;
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px;
+            background: rgba(3, 6, 18, 0.88);
+            -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+        .moved-box {
+            width: 100%; max-width: 440px; text-align: center;
+            padding: 36px 24px; border-radius: 24px;
+            background: linear-gradient(160deg, #0d1530, #070b1c);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            box-shadow: 0 0 40px rgba(0, 229, 255, 0.25);
+            color: #fff;
+        }
+        .moved-box img { width: 140px; max-width: 60%; height: auto; margin-bottom: 16px; }
+        .moved-box h2 { margin: 0 0 10px; font-size: 1.6rem; }
+        .moved-box p { margin: 0 0 26px; color: #b9c3e0; font-size: 1.05rem; line-height: 1.7; }
+        .moved-btn {
+            display: inline-block; padding: 16px 34px; border-radius: 16px;
+            background: linear-gradient(90deg, #ffc400, #ffab00);
+            color: #111; font-weight: 800; font-size: 1.15rem; text-decoration: none;
+            box-shadow: 0 6px 24px rgba(255, 196, 0, 0.45);
+            animation: moved-pulse 1.6s ease-in-out infinite;
+        }
+        .moved-btn:focus-visible { outline: 3px solid #00e5ff; outline-offset: 4px; }
+        .moved-url { display: block; margin-top: 14px; color: #00e5ff; font-size: 0.95rem; direction: ltr; }
+        @keyframes moved-pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @media (prefers-reduced-motion: reduce) { .moved-btn { animation: none; } }
     </style>
 </head>
 <body>
+
+    <!-- ===== شاشة الانتقال للموقع الجديد ===== -->
+    <div class="moved-overlay" id="movedOverlay" role="dialog" aria-modal="true" aria-labelledby="movedTitle">
+        <div class="moved-box">
+            <img src="logo.png" alt="ألعاب أيمن">
+            <h2 id="movedTitle">انتقلنا لموقع جديد! 🚀</h2>
+            <p>هذا الموقع مغلق الآن. كل الألعاب صارت في موقعنا الجديد.</p>
+            <a class="moved-btn" id="movedBtn" href="https://aymngames.online/">انتقل للموقع الجديد</a>
+            <span class="moved-url">aymngames.online</span>
+        </div>
+    </div>
+    <script>
+        (function () {
+            document.documentElement.classList.add('moved-lock');
+            var overlay = document.getElementById('movedOverlay');
+            // تعطيل كل محتوى الصفحة ما عدا شاشة الانتقال
+            Array.prototype.forEach.call(document.body.children, function (el) {
+                if (el !== overlay && el.tagName !== 'SCRIPT') { el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+            });
+            var obs = new MutationObserver(function (list) {
+                list.forEach(function (m) { m.addedNodes.forEach(function (n) {
+                    if (n.nodeType === 1 && n !== overlay && n.tagName !== 'SCRIPT') { n.setAttribute('inert', ''); n.setAttribute('aria-hidden', 'true'); }
+                }); });
+            });
+            obs.observe(document.body, { childList: true });
+            var btn = document.getElementById('movedBtn');
+            btn.focus();
+            document.addEventListener('focusin', function (e) { if (!overlay.contains(e.target)) btn.focus(); });
+        })();
+    </script>
 
     <!-- أيقونة عداد الزوار الحاليين (لأغراض تسويقية) -->
     <div class="visitor-counter">
